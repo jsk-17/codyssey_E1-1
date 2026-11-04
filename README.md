@@ -2,18 +2,20 @@
 # Docker 개발자 워크스테이션 구축
 
 ## 1) 프로젝트 개요
-- (미션 목표를 한두 줄로 요약 예정)
+- 리눅스 CLI, Docker, Git/GitHub를 활용해 개발자 워크스테이션을 구축한다.
+- 터미널로 파일/권한을 관리하고, Docker로 웹 서버를 컨테이너화하여
+  포트 매핑 접속, 바인드 마운트 반영, 볼륨 영속성을 검증한다.
 
 ## 2) 실행 환경
-- OS: 
-- Shell: 
-- Docker: 
-- Git: 
+- OS: Windows (Git Bash 사용)
+- Shell: bash (Git Bash)
+- Docker: Docker version 29.9.2, build a82e528
+- Git: git version 2.56.0.windows.4
 
 ## 3) 수행 체크리스트
 - [ ] 1. 터미널 기본 조작
 - [ ] 2. 권한 변경 실습
-- [ ] 3. Docker 설치/점검
+- [x] 3. Docker 설치/점검
 - [ ] 4. Docker 기본 운영 (hello-world, ubuntu)
 - [ ] 5. Dockerfile 빌드/실행
 - [ ] 6. 포트 매핑 접속 (2회)
@@ -29,6 +31,18 @@
 ### 2. 권한 변경 실습
 
 ### 3. Docker 설치/점검
+
+$ docker --version
+Docker version 29.9.2, build a82e528
+
+$ git --version
+git version 2.56.0.windows.4
+
+$ docker info   # 데몬 정상 확인 (Server 섹션 출력됨)
+Server Version: 29.9.2
+Containers: 0 / Images: 0
+OSType: linux (WSL2)
+→ Docker 엔진 정상 작동 확인
 
 ### 4. Docker 기본 운영
 
