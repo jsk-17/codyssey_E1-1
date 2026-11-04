@@ -26,7 +26,30 @@
 ## 4) 수행 로그
 
 ### 1. 터미널 기본 조작
-(여기에 명령어+출력 기록 예정)
+```bash
+$ pwd                # 현재 내 위치(폴더) 확인
+C:/codyE1-1/codyssey_E1-1
+
+$ ls                 # 현재 폴더의 파일/폴더 목록 보기
+app/  images/  README.md
+
+$ cd app             # app 폴더로 이동
+$ pwd                # 잘 들어왔는지 확인
+C:/codyE1-1/codyssey_E1-1/app
+
+$ touch test.txt     # 빈 파일 생성
+$ ls                 # 생성 확인
+test.txt
+
+$ cat test.txt       # 파일 내용 확인 (빈 파일이라 출력 없음)
+
+$ rm test.txt        # 파일 삭제
+$ ls                 # 삭제 확인 (아무것도 안 나옴)
+
+$ cd ..              # 상위 폴더로 이동
+$ pwd                # 루트로 돌아왔는지 확인
+C:/codyE1-1/codyssey_E1-1
+```
 
 ### 2. 권한 변경 실습
 
