@@ -13,7 +13,7 @@
 - Git: git version 2.56.0.windows.4
 
 ## 3) 수행 체크리스트
-- [ ] 1. 터미널 기본 조작
+- [x] 1. 터미널 기본 조작
 - [ ] 2. 권한 변경 실습
 - [x] 3. Docker 설치/점검
 - [ ] 4. Docker 기본 운영 (hello-world, ubuntu)
@@ -79,6 +79,17 @@ OSType: linux (WSL2)
 
 ### 9. Git 설정 + GitHub 연동
 
-## 5) 트러블슈팅
-1. (문제 → 원인 → 확인 → 해결)
+## 5) 트러블슈팅 (문제 → 원인 → 확인 → 해결)
+1.  문제 : 파일의 권한 변경 불가
+```bash
+$ touch test.txt
+$ ls -l test.txt              # 권한 확인 (rw-r--r-- = 644)
+-rw-r--r-- 1 ... test.txt
+
+$ chmod 755 test.txt          # 권한을 755(rwxr-xr-x)로 변경 시도
+$ ls -l test.txt
+-rw-r--r-- 1 ... test.txt     # 권한 변경이 되지 않음
+    원인 : Windows의 Git Bash에서는 chmod가 실제 권한에 반영되지 않을 수 있음
+
+    확인 : (Docker 컨테이너 안에서 다시 확인해볼 예정)
 2. 
