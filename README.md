@@ -18,8 +18,8 @@
 - [x] 1. 터미널 기본 조작
 - [x] 2. 권한 변경 실습
 - [x] 3. Docker 설치/점검
-- [ ] 4. Docker 기본 운영 (hello-world, ubuntu)
-- [ ] 5. Dockerfile 빌드/실행
+- [x] 4. Docker 기본 운영 (hello-world, ubuntu)
+- [x] 5. Dockerfile 빌드/실행
 - [ ] 6. 포트 매핑 접속 (2회)
 - [ ] 7. 바인드 마운트 반영
 - [ ] 8. 볼륨 영속성
@@ -128,6 +128,30 @@ Architecture: x86_64
 
 ### 4. Docker 기본 운영
 
+4-1. hello-world 실행
+```bash
+$ docker run hello-world
+
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+
+To generate this message, Docker took the following steps:
+ 1. The Docker client contacted the Docker daemon.
+ 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.
+ 3. The Docker daemon created a new container from that image which runs the
+    executable that produces the output you are currently reading.
+ 4. The Docker daemon streamed that output to the Docker client, which sent it
+    to your terminal.
+
+$ docker images
+REPOSITORY    TAG       IMAGE ID       CREATED        SIZE
+hello-world   latest    74cc54e27dc4   4 months ago   10.1kB
+
+$ docker ps -a
+CONTAINER ID   IMAGE         COMMAND    CREATED          STATUS                      PORTS     NAMES
+a0f5a3a1d2c1   hello-world   "/hello"   10 seconds ago   Exited (0) 9 seconds ago              vibrant_morse
+```
+4-2. ubuntu 컨테이너 대화형 실행
 ```bash
 $ docker run -it ubuntu bash
 
@@ -156,7 +180,53 @@ exit
 
 ### 5. Dockerfile 빌드/실행
 
-*(진행 예정)*
+```dockerfile
+# 5-1. Dockerfile 작성
+FROM ubuntu:22.04
+
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+```
+# 5-2. 이미지 빌드
+$ docker build -t codyssey-workspace .
+[+] Building ...
+...
+Successfully built 427c0bd977c6
+Successfully tagged codyssey-workspace:latest
+
+$ docker images
+REPOSITORY             TAG       IMAGE ID       CREATED          SIZE
+codyssey-workspace     latest    427c0bd977c6   ...              650MB
+
+# 5-3. 컨테이너 실행 및 도구 검증
+$ docker run -it --name my-workspace codyssey-workspace
+
+root@0655daef7d49:/app# python3 --version
+Python 3.10.12
+root@0655daef7d49:/app# curl --version
+curl 7.81.0 (x86_64-pc-linux-gnu) ...
+root@0655daef7d49:/app# git --version
+git version 2.34.1
+root@0655daef7d49:/app# pip3 --version
+pip 22.0.2 from /usr/lib/python3/dist-packages/pip (python 3.10)
+root@0655daef7d49:/app# exit
+exit
+```
+
+| 도구 | 버전 | 상태 |
+|------|------|------|
+| Python3 | 3.10.12 | ✅ |
+| curl | 7.81.0 | ✅ |
+| git | 2.34.1 | ✅ |
+| pip3 | 22.0.2 | ✅ |
+
+> ✅ 커스텀 이미지 빌드 및 도구 설치 정상 확인
 
 ---
 
