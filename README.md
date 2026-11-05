@@ -128,7 +128,29 @@ Architecture: x86_64
 
 ### 4. Docker 기본 운영
 
-*(진행 예정)*
+```bash
+$ docker run -it ubuntu bash
+
+root@e605117cf412:/# ls
+bin   dev  home  lib64  mnt  proc  run   srv  tmp  var
+boot  etc  lib   media  opt  root  sbin  sys  usr
+
+root@e605117cf412:/# echo "hello ubuntu"
+hello ubuntu
+
+root@e605117cf412:/# cat /etc/os-release
+PRETTY_NAME="Ubuntu 26.04.1 LTS"
+NAME="Ubuntu"
+VERSION_ID="26.04"
+VERSION="26.04.1 LTS (Resolute Raccoon)"
+VERSION_CODENAME=resolute
+ID=ubuntu
+ID_LIKE=debian
+
+root@e605117cf412:/# exit
+exit
+```
+> ✅ Ubuntu 26.04 LTS 컨테이너 내부 진입 및 명령 실행 확인
 
 ---
 
