@@ -20,8 +20,8 @@
 - [x] 3. Docker 설치/점검
 - [x] 4. Docker 기본 운영 (hello-world, ubuntu)
 - [x] 5. Dockerfile 빌드/실행
-- [ ] 6. 포트 매핑 접속 (2회)
-- [ ] 7. 바인드 마운트 반영
+- [x] 6. 포트 매핑 접속 (2회)
+- [x] 7. 바인드 마운트 반영
 - [ ] 8. 볼륨 영속성
 - [ ] 9. Git 설정 + GitHub 연동
 
@@ -194,6 +194,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 ```
 # 5-2. 이미지 빌드
+```bash
 $ docker build -t codyssey-workspace .
 [+] Building ...
 ...
@@ -232,21 +233,156 @@ exit
 
 ### 6. 포트 매핑 접속
 
-*(진행 예정)*
+```bash
+# 6-1. nginx 이미지 준비 및 컨테이너 실행
+$ docker pull nginx
+$ docker run -d -p 8080:80 --name web-8080 nginx   # 호스트 8080 → 컨테이너 80
 
----
+$ docker ps                                          # Up 상태 확인
+CONTAINER ID   IMAGE   COMMAND                  STATUS         PORTS                  NAMES
+bd1901d45e0b   nginx   "/docker-entrypoint.…"   Up ...         0.0.0.0:8080->80/tcp   web-8080
+```
+
+```bash
+# 6-2. 브라우저 접속 → http://localhost:8080
+# 결과: "Welcome to nginx!" 페이지 정상 출력
+# (스크린샷: ./images/스크린샷.png)
+```
+
+```bash
+# 6-3. 접속 로그 확인
+$ docker logs web-8080
+...
+2026/11/09 03:02:08 [notice] 1#1: nginx/1.31.8
+2026/11/09 03:02:08 [notice] 1#1: start worker processes
+172.17.0.1 - - [09/Nov/2026:03:04:37 +0000] "GET / HTTP/1.1" 200 896 ...   # 정상 응답 200
+172.17.0.1 - - [09/Nov/2026:03:04:37 +0000] "GET /favicon.ico HTTP/1.1" 404 555 ...  # 아이콘 없음(정상)
+```
+> ✅ 브라우저 접속 기록 `GET / 200` 확인 → 포트 매핑 정상 동작
+
+```bash
+# 6-4. 리소스 상태 확인
+$ docker stats --no-stream
+CONTAINER ID   NAME       CPU %   MEM USAGE / LIMIT    NET I/O
+bd1901d45e0b   web-8080   0.00%   25.25MiB / 15.25GiB  5.36kB / 4.25kB
+```
+
+| 항목 | 접속 전 | 접속 후 |
+|------|---------|---------|
+| NET I/O | 1.7kB / 126B | 5.36kB / 4.25kB |
+
+> ✅ 접속 후 NET I/O 증가 → 실제 통신 발생 확인
 
 ### 7. 바인드 마운트
 
-*(진행 예정)*
 
+## 1. 호스트 파일 준비 (변경 전)
+​```bash
+# html 폴더 및 index.html 생성
+$ cat html/index.html
+<h1>Hello Bind Mount</h1>    # (※ 최초 작성 내용)
+​```
+
+### 2. 컨테이너 실행 (바인드 마운트)
+​```bash
+$ MSYS_NO_PATHCONV=1 docker run -d -p 8081:80 \
+    -v "$(pwd)/html:/usr/share/nginx/html" \
+    --name web-bind nginx
+ecc24a3e4e63...    # 컨테이너 ID 출력
+​```
+
+## 3. 초기 상태 확인
+​```bash
+# 컨테이너 내부 파일 확인
+$ MSYS_NO_PATHCONV=1 docker exec web-bind \
+    cat /usr/share/nginx/html/index.html
+<h1>Hello Bind Mount</h1>
+​```
+→ 브라우저 http://localhost:8081 : "Hello Bind Mount" 표시
+
+---
+
+## 4. 호스트에서 파일 수정 (변경 발생)
+​```bash
+# 호스트의 index.html 내용을 변경
+$ echo '<h1>Updated!</h1>' > html/index.html
+
+# 호스트 파일 확인
+$ cat html/index.html
+<h1>Updated!</h1>
+​```
+
+## 5. 변경 후 컨테이너 반영 확인
+​```bash
+# 컨테이너 재시작/재빌드 없이 그대로 확인
+$ MSYS_NO_PATHCONV=1 docker exec web-bind \
+    cat /usr/share/nginx/html/index.html
+<h1>Updated!</h1>
+​```
+→ 브라우저 새로고침(Ctrl+Shift+R) : "Updated!" 표시
+
+
+### 변경 전/후 비교
+
+| 구분 | 호스트 (html/index.html) | 컨테이너 내부 | 브라우저 |
+|------|--------------------------|----------------|-----------|
+| 변경 전 | `<h1>Hello Bind Mount</h1>` | 동일 | Hello Bind Mount |
+| 변경 후 | `<h1>Updated!</h1>` | **자동 반영** | Updated! |
+
+### 결론
+- 컨테이너를 **재시작하지 않고도** 호스트 파일 수정이 즉시 반영됨
+- 바인드 마운트가 호스트↔컨테이너를 실시간으로 연결함을 확인 ✔
 ---
 
 ### 8. 볼륨 영속성
 
-*(진행 예정)*
+Docker 볼륨을 생성하고 컨테이너에 연결한 뒤, **컨테이너를 삭제해도 데이터가 유지되는지** 검증한다.
 
----
+#### ① 볼륨 생성 및 확인
+```bash
+$ docker volume create myvolume
+myvolume
+
+$ docker volume ls
+DRIVER    VOLUME NAME
+local     myvolume
+```
+
+#### ② 볼륨 연결 컨테이너 실행 & 데이터 쓰기
+```bash
+$ docker run -it --name vol-test2 -v myvolume:/data ubuntu bash
+root@94b034b01b18:/# echo "persistent data" > /data/test.txt
+root@94b034b01b18:/# cat /data/test.txt
+persistent data
+root@94b034b01b18:/# exit
+```
+> `-v myvolume:/data` : 볼륨 `myvolume`을 컨테이너 내부 `/data`에 마운트
+
+#### ③ 컨테이너 삭제 (삭제 전/후 비교)
+```bash
+$ docker rm vol-test2
+vol-test2
+
+$ docker ps -a    # 목록에서 vol-test2 사라짐 확인
+```
+
+#### ④ 새 컨테이너에 같은 볼륨 연결 → 데이터 생존 검증
+```bash
+$ docker run -it --name vol-check -v myvolume:/data ubuntu bash
+root@aa888e4323f2:/# cat /data/test.txt
+persistent data          # ← 데이터 유지됨!
+root@aa888e4323f2:/# exit
+```
+
+#### ✅ 결과
+- 기존 컨테이너(`vol-test2`)를 삭제하고 **완전히 새로운 컨테이너**(`vol-check`)를 생성했음에도
+  볼륨에 저장한 `persistent data`가 그대로 유지됨
+- **컨테이너는 일회용이지만, 볼륨은 영구 저장소**임을 확인
+
+| 구분 | 바인드 마운트 | 볼륨 |
+|------|-------------|------|
+| 저장 위치 | 호스트 지정 폴더 | Docker 관리 영역 |
+| 용도 | 개발/소스코드 수정 | 데이터 영구 보관 |
 
 ### 9. Git 설정 + GitHub 연동
 
@@ -260,10 +396,10 @@ exit
 |---|---|---|
 | Docker 설치 | `docker --version` | 3단계 로그 |
 | Docker 데몬 | `docker info` | 3단계 로그 |
-| hello-world | `docker run hello-world` | 4단계 로그 (예정) |
-| 이미지 목록 | `docker images` | 4단계 로그 (예정) |
-| 컨테이너 목록 | `docker ps -a` | 4단계 로그 (예정) |
-| 포트 매핑 | 브라우저 접속 화면 | 6단계 스크린샷 (예정) |
+| hello-world | `docker run hello-world` | 4단계 로그 |
+| 이미지 목록 | `docker images` | 4단계 로그 |
+| 컨테이너 목록 | `docker ps -a` | 4단계 로그 |
+| 포트 매핑 | 브라우저 접속 화면 | 6단계 로그/스크린샷 |
 | 볼륨 영속성 | 컨테이너 삭제 전/후 비교 | 8단계 로그 (예정) |
 
 ---
@@ -274,8 +410,31 @@ exit
 | 항목 | 내용 |
 |---|---|
 | **문제** | `chmod 755 test.txt` 실행 후 `ls -l`로 확인해도 권한이 변경되지 않음 |
-| **원인 가설** | Windows NTFS 파일시스템은 리눅스 권한 체계(rwx)를 지원하지 않아 Git Bash의 chmod가 무시됨 |
+| **원인** | Windows NTFS 파일시스템은 리눅스 권한 체계(rwx)를 지원하지 않아 Git Bash의 chmod가 무시됨 |
 | **확인** | `ls -l` 반복 실행 → 권한 숫자 변화 없음 |
-| **해결/대안** | Docker ubuntu 컨테이너 내부(리눅스 환경)에서 chmod 재실습 → 정상 반영 확인 (2단계 참고) |
+| **대안** | Docker ubuntu 컨테이너 내부(리눅스 환경)에서 chmod 재실습 → 정상 반영 확인 (2단계 참고) |
+
+### TS-2. 바인드 마운트 후 브라우저에 변경사항이 반영되지 않음
+
+**문제**
+- 컨테이너는 정상 생성됨 (ID 출력됨)
+- docker exec로 파일을 확인하려 하면 아래 에러 발생
+```code
+cat: 'C:/Program Files/Git/usr/share/nginx/html/index.html':
+No such file or directory
+```
+**원인**
+처음엔 -v 옵션의 공백 누락을 의심했으나,
+에러 메시지의 경로가 컨테이너 경로(/usr/share/...)가 아니라
+C:/Program Files/Git/usr/share/... 로 바뀐 것을 확인
+MSYS(Git Bash) 환경이 유닉스식 절대 경로(/usr/...)를
+윈도우 경로로 자동 변환(path conversion)하는 것이 원인
+
+**확인**
+에러에 찍힌 경로가 윈도우 경로로 치환되어 있음을 확인
+-v 와 exec의 컨테이너 측 경로가 모두 변환되어 엉뚱한 위치를 가리킴
+
+**대안**
+경로 변환을 비활성화하는 환경변수 MSYS_NO_PATHCONV=1 를 명령 앞에 붙임
 
 ---
