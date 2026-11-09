@@ -22,8 +22,8 @@
 - [x] 5. Dockerfile 빌드/실행
 - [x] 6. 포트 매핑 접속 (2회)
 - [x] 7. 바인드 마운트 반영
-- [ ] 8. 볼륨 영속성
-- [ ] 9. Git 설정 + GitHub 연동
+- [x] 8. 볼륨 영속성
+- [x] 9. Git 설정 + GitHub 연동
 
 ## 4) 수행 로그
 
@@ -386,9 +386,40 @@ root@aa888e4323f2:/# exit
 
 ### 9. Git 설정 + GitHub 연동
 
-*(진행 예정)*
+#### 9-1. Git 사용자 정보 설정
+```bash
+$ git config --global user.name "이**"
+$ git config --global user.email "dl******@gmail.com"
+```
+> 커밋 작성자 정보 등록. `--global`로 전체 저장소에 공통 적용.
 
----
+#### 9-2. 기본 브랜치 설정
+```bash
+$ git config --global init.defaultBranch main
+```
+> 새 저장소 생성 시 기본 브랜치를 `main`으로 지정.
+
+#### 9-3. 설정 확인
+```bash
+$ git config --list
+...
+init.defaultbranch=master
+user.name=이**
+user.email=dl******@gmail.com
+init.defaultbranch=main
+...
+```
+> 사용자 정보와 기본 브랜치 설정이 정상 반영됨을 확인.
+> (`init.defaultbranch`가 두 번 보이지만, 나중 값인 `main`이 최종 적용됨)
+
+#### 9-4. VSCode 실행 및 GitHub 저장소 연동
+```bash
+$ code .              # 현재 폴더를 VSCode로 열기
+$ git remote -v       # 원격 저장소 연결 확인
+origin  https://github.com/jsk-17/codyssey_E1-1.git (fetch)
+origin  https://github.com/jsk-17/codyssey_E1-1.git (push)
+```
+> 로컬 저장소가 원격(origin)에 정상 연결됨을 확인.
 
 ## 5) 검증 방법 및 결과 위치
 
